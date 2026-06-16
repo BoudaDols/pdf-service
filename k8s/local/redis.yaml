@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pdf-service-redis
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pdf-service-redis
+  template:
+    metadata:
+      labels:
+        app: pdf-service-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pdf-service-redis
+  namespace: default
+spec:
+  selector:
+    app: pdf-service-redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+  type: ClusterIP

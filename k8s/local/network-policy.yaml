@@ -1,0 +1,85 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: pdf-service-network-policy
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: pdf-service
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: api-gateway
+      ports:
+        - protocol: TCP
+          port: 8000
+  egress:
+    # MySQL
+    - to:
+        - podSelector:
+            matchLabels:
+              app: pdf-service-mysql
+      ports:
+        - protocol: TCP
+          port: 3306
+    # Redis
+    - to:
+        - podSelector:
+            matchLabels:
+              app: pdf-service-redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    # S3/Azure Blob (HTTPS)
+    - ports:
+        - protocol: TCP
+          port: 443
+    # DNS
+    - ports:
+        - protocol: UDP
+          port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: pdf-service-mysql-network-policy
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: pdf-service-mysql
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: pdf-service
+      ports:
+        - protocol: TCP
+          port: 3306
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: pdf-service-redis-network-policy
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: pdf-service-redis
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: pdf-service
+      ports:
+        - protocol: TCP
+          port: 6379

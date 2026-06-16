@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pdf-service-mysql-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pdf-service-mysql
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pdf-service-mysql
+  template:
+    metadata:
+      labels:
+        app: pdf-service-mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pdf-service-secrets
+                  key: DB_PASSWORD
+            - name: MYSQL_DATABASE
+              value: "pdf_service"
+          volumeMounts:
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "250m"
+              memory: "512Mi"
+      volumes:
+        - name: mysql-data
+          persistentVolumeClaim:
+            claimName: pdf-service-mysql-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pdf-service-mysql
+  namespace: default
+spec:
+  selector:
+    app: pdf-service-mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+  type: ClusterIP
