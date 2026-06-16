@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-from fastapi import Header, HTTPException, Depends
+from fastapi import Header, HTTPException
 from redis import Redis
-from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import SessionLocal
 
