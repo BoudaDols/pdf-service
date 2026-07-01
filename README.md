@@ -53,6 +53,11 @@ pdf-service/
 
 ## Getting Started
 
+### Consumers
+The following clients call this service via the api-gateway proxy:
+- **frontend** (Vue 3 SPA) — `GET /pdfs`, `POST /pdfs/{id}/open`, `POST /pdfs/{id}/close`
+- **api-gateway** — forwards requests with `X-User-ID`, `X-User-Plan` headers used for access control
+
 ### Requirements
 - Python 3.12+
 - MySQL
